@@ -6,20 +6,31 @@
 
 <<< "Arnau Orriols - This is awesome!" >>>;
 
+440 => int A;
+0.5 => float midGain;
+1::second => dur standardTime;
+
+
 SinOsc baseRiff => dac;         // dac stands for Digital to Analog Converter
 
-0.4 => baseRiff.gain;
-330 => baseRiff.freq;
-1::second => now;               // We pause 1 sec and execute all the code above
+midGain - 0.1 => baseRiff.gain;
+A * 3/4 => baseRiff.freq;
+standardTime => now;               // We pause 1 sec and execute all the code above
 
-0.5 => baseRiff.gain;
-440 => baseRiff.freq;
-2::second => now;
+midGain => baseRiff.gain;
+A => baseRiff.freq;
+standardTime * 2 => now;
 
-0.3 => baseRiff.gain;
-660 => baseRiff.freq;
-1::second => now;
+midGain - 0.2 => baseRiff.gain;
+A + (A/2) => baseRiff.freq;
+standardTime => now;
 
+
+
+
+
+
+/*
 
 <<< "Square" >>>;
 SqrOsc squareBackground => dac;
@@ -46,3 +57,4 @@ SawOsc sawDisturbiance => dac;
 1 => sawDisturbiance.gain;
 2000 => sawDisturbiance.freq;
 500::ms => now;
+*/
