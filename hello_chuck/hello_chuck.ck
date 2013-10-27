@@ -8,22 +8,22 @@
 
 440 => int A;
 0.5 => float midGain;
-1::second => dur standardTime;
+500::ms => dur quarter;
 
 
 SinOsc baseRiff => dac;         // dac stands for Digital to Analog Converter
 
 midGain - 0.1 => baseRiff.gain;
 A * 3/4 => baseRiff.freq;
-standardTime => now;               // We pause 1 sec and execute all the code above
+quarter => now;               // We pause 1 sec and execute all the code above
 
 midGain => baseRiff.gain;
 A => baseRiff.freq;
-standardTime * 2 => now;
+quarter * 2 => now;
 
 midGain - 0.2 => baseRiff.gain;
 A + (A/2) => baseRiff.freq;
-standardTime => now;
+quarter => now;
 
 
 
