@@ -1,5 +1,18 @@
 // 26/10/2013
-// Assignment 1 - IPMDA
+// Assignment 1 - Chucksomeness
+
+/*
+    * Some considerations:
+ *       - This level of commenting is by no means the real word's good practice.
+ *              Expert programmers: don't freak out, I'm just following the
+ *                                  course guidelines, which actually make
+ *                                  sense, since people in this course are not
+ *                                  suposed to have any experience in
+ *                                  programming, and will appreciate some extra
+ *                                  explanation, if they have to evaluate and
+ *                                  learn from other people's code.
+ */
+
 
 <<< "Assignment_1_Chucksomeness" >>>;
 
