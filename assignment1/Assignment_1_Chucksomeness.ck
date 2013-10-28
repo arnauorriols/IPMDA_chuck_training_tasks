@@ -37,9 +37,9 @@ half * 2 => dur whole;
 
 // Meter definition
 quarter * 4 => dur measure; // 4 beats per measure (4/4 meter)
-4 * measure => dur semiSection;
-2 * semiSection => dur section;
-2 * section => dur composition;
+4 * measure => dur semiSection; // 4 measures per semi-section
+2 * semiSection => dur section; // 2 semi-sections per section (8 bars (4+4))
+2 * section => dur composition; // 2 sections per composition ( 16 bars, ((4+4)+(4+4)) )
 
 // Notes frequency definition
 // C MAJOR
