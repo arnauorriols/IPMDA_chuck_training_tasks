@@ -25,6 +25,7 @@ SinOsc third => dac; // third of the chord
 SinOsc fifth => dac; // fifth of the chord
 SinOsc octave => dac; // octave of the chord
 TriOsc firstMelody => dac;
+TriOsc firstMelody2 => dac;  // Plays a second voice at the second semi-section
 SqrOsc secondMelody => dac;
 
 // Notes lenght definition
@@ -106,6 +107,14 @@ while ( now < end ) {   // loop while "right now" is below the end time
 
         // In the first section firstMelody will play (TriOsc)
         0.3 => firstMelody.gain;
+        if (now < (start + semiSection)) {
+            // If playing the first semi-section, mute the second voice
+            0.0 => firstMelody2.gain;
+        } else {
+            // In the second semi-section (now > start+semiSection)
+            // apply some gain to the second voice
+            0.04 => firstMelody2.gain;
+        }
         0.0 => secondMelody.gain;
 
         if (!even) {
@@ -113,10 +122,15 @@ while ( now < end ) {   // loop while "right now" is below the end time
             for (0 => int x; x < 2; x++) {
                 // Plays 2 times this sequences, which matches a measure
                 G4 => firstMelody.freq;
+                E4 * 2 => firstMelody2.freq; // Will only sound on the 2nd
+                                             // semi-section
                 3 * steenth => now;  // Equals dotted eighth note
+
                 C4 * 2 => firstMelody.freq; // Equals C5
+                G4 * 2 => firstMelody2.freq;
                 3 * steenth => now;     // Equals dotted eighth note
                 C4 => firstMelody.freq;
+                G4 => firstMelody2.freq;
                 eighth => now;
             }
         1 => even;   // Next bar (ie, next loop execution) even will be true
@@ -126,10 +140,13 @@ while ( now < end ) {   // loop while "right now" is below the end time
             for (0 => int x; x < 2; x++) {
                 // Same rhythm as before
                 G4 => firstMelody.freq;
+                F4 * 2 => firstMelody2.freq;
                 3 * steenth => now;
                 B4 => firstMelody.freq; // i.e. C5
+                G4 * 2 => firstMelody2.freq;
                 3 * steenth => now;
                 D4 * 2 => firstMelody.freq;
+                F4 * 2 => firstMelody2.freq;
                 eighth => now;
             }
         0 => even;    // Next bar even will be false
@@ -139,6 +156,7 @@ while ( now < end ) {   // loop while "right now" is below the end time
 
         // In the second section secondMelody takes the lead (SqrOsc)
         0.0 => firstMelody.gain;
+        0.0 => firstMelody2.gain;
         0.1 + increment => secondMelody.gain;   // secondMelody will play in crescendo:
                                                 // In every loop execution, increment gets "incremented"
 
