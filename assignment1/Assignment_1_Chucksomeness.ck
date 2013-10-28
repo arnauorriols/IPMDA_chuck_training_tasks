@@ -29,7 +29,8 @@ TriOsc firstMelody2 => dac;  // Plays a second voice at the second semi-section
 SqrOsc secondMelody => dac;
 
 // Notes lenght definition
-468.75::ms => dur quarter; // to match 16 bars in 30 seconds.
+468.75::ms => dur quarter; // to match 16 measures in 30 seconds. (4 quarters per bar,
+                           // 468.75(ms) * 4(beats/bar) * 16(bars) = 30000 ms).
 quarter / 2 => dur eighth;
 eighth / 2 => dur steenth;
 quarter * 2 => dur half;
