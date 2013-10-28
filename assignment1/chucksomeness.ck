@@ -40,7 +40,9 @@ quarter * 4 => dur measure; // 4 beats per measure (4/4 meter)
 
 // time control variables
 now => time start;  // stores the time of the loop start ("right now")
-start + composition => time end;    // stores the time the loop should end ("right now" + 30 secs)
+start + composition => time end;    // stores the time the loop should end
+                                    // ("right now" + 30 secs).
+
 1 => int barNum;  // Keeps track of the number of the current bar.
 
 // Other control variables
@@ -72,7 +74,7 @@ while ( now < end ) {   // loop while "right now" is below the end time
 
         // Odd measures == Tonic chord: C MAJOR
         C4 / 2  => base.freq;  // Sets frequency to C3 for the base note.
-        E4 / 2 => third.freq; // Sets the corresponding notes for the rest of the chord.
+        E4 / 2 => third.freq;  // Sets the corresponding notes for the rest of the chord.
         G4 / 2 => fifth.freq;
         C4 => octave.freq;
 
@@ -94,7 +96,7 @@ while ( now < end ) {   // loop while "right now" is below the end time
         0.0 => secondMelody.gain;
 
         if (!even) {
-            // On odd bars, plays some CMajor chord notes. 
+            // On odd bars, plays some CMajor chord notes.
             for (0 => int x; x < 2; x++) {
                 // Plays 2 times this sequences, which matches a measure
                 G4 => firstMelody.freq;
@@ -105,7 +107,7 @@ while ( now < end ) {   // loop while "right now" is below the end time
                 eighth => now;
             }
         1 => even;   // Next bar (ie, next loop execution) even will be true
-        
+
         } else {
             // on even bars, plays some GMajor chord notes.
             for (0 => int x; x < 2; x++) {
@@ -119,9 +121,9 @@ while ( now < end ) {   // loop while "right now" is below the end time
             }
         0 => even;    // Next bar even will be false
         }
-    
+
     } else {    // SECOND SECTION (9 - 16 bars)
-        
+
         // In the second section secondMelody takes the lead (SqrOsc)
         0.0 => firstMelody.gain;
         0.1 + increment => secondMelody.gain;   // secondMelody will play in crescendo:
@@ -130,12 +132,15 @@ while ( now < end ) {   // loop while "right now" is below the end time
         if (!even && barNum != 15 && barNum != 16) {    // Same even/odd bars handling as before
             for (0 => int x; x <3; x++) {
                 // This time the sequence is faster, gets played 3 times each bar
-                if ( x != 2 ) {    
-                    
+                if ( x != 2 ) {
+
                     // It doesn't match exactly one bar. in the 3rd repetition of the sequence
                     // the last note is ommited.
-                    (Bb4 / 2) * octaveMultiplier => secondMelody.freq;  // Each time this sequence will play one octave higher, hence the octaveMultiplier
-                    steenth => now;     // This sequence's rhythm is based on sixteenth notes. 
+                    (Bb4 / 2) * octaveMultiplier => secondMelody.freq;
+                    // Each time this sequence will play one octave higher,
+
+                    // hence the octaveMultiplier
+                    steenth => now;     // This sequence's rhythm is based on sixteenth notes.
                     (G4 / 2) * octaveMultiplier => secondMelody.freq;
                     steenth => now;
                     (F4 / 2) * octaveMultiplier => secondMelody.freq;
@@ -144,7 +149,10 @@ while ( now < end ) {   // loop while "right now" is below the end time
                     steenth => now;
                     (C4 / 2) * octaveMultiplier => secondMelody.freq;
                     eighth => now;
-                } else {    // In the 3rd repetition of the sequence, and for the sake of connection with the next one, the last eighth note is ommited
+                } else {
+
+                    // In the 3rd repetition of the sequence, and for the sake
+                    // of connection with the next one, the last eighth note is ommited
                     (Bb4 / 2) * octaveMultiplier => secondMelody.freq;
                     steenth => now;
                     (G4 / 2) * octaveMultiplier => secondMelody.freq;
@@ -156,12 +164,17 @@ while ( now < end ) {   // loop while "right now" is below the end time
                 }
             }
         1 => even;      // Next bar even will be true
-        
-        } else {    // if the above condition is false, we are in an even bar (remember, GMajor)
-            
-            if (barNum != 16){  // bar 16th is the end, therefore won't play the sequence, but a final steady note
+
+        } else {
+            // if the above condition is false, we are in an even bar (remember, GMajor)
+
+            if (barNum != 16){  // bar 16th is the end, therefore won't play
+                                // the sequence, but a final steady note
+
                 for (0 => int x; x <3; x++) {
-                    if ( x != 2 ) {     // Same as above, different notes to match the harmony (GMajor)
+                    if ( x != 2 ) {
+
+                        // Same as above, different notes to match the harmony (GMajor)
                         F4 * octaveMultiplier => secondMelody.freq;
                         steenth => now;
                         D4 * octaveMultiplier => secondMelody.freq;
@@ -184,26 +197,33 @@ while ( now < end ) {   // loop while "right now" is below the end time
                     }
                 }
             0 => even;  // Next bar even will be false;
-            
+
             } else {
-                
-                // Last bar (16th): melody plays an steady C7, and we increase the base note's gain a bit.
+
+                // Last bar (16th): melody plays an steady C7, and increases
+                // the base note's gain a bit.
                 0.45 => base.gain;
                 0.00 => octave.gain;
                 2093.00 => secondMelody.freq; // C7
-                measure => now;     // Plays steady the entire measure, which has been defined before
+                measure => now;     // Plays steady the entire measure.
+                                    // measure variable has been defined before
             }
 
-            // Control variables update at the end of the loop (only after the even bars, i.e. every 2 bars)
-            0.05 +=> increment;     // After every complete sequence (CMajor + GMajor) the gain of the melody will be increased by 0.05
-            2 *=> octaveMultiplier; // After every complete sequence (CMajor + GMajor) the melody will play 1 octave higher
+            // Control variables update at the end of the loop
+            // (only after the even bars, i.e. every 2 bars (the complete
+            // sequence (CMajor + GMajor)).
+            0.05 +=> increment;     // The gain of the melody will be increased by 0.05
+            2 *=> octaveMultiplier; // The melody will play 1 octave higher
                                     // (1 octave higher == current frequency * 2)
         }
     }
     barNum ++; // Update the control of the current bar number.
-    
-    // End of loop. If now is still not the calculated moment of composition end, keep executing.
+
+    // End of loop. If now is still not the calculated moment of
+    // composition end, keep executing.
 }
-<<< "End of piece. Duration: " + (now - start)/second + " seconds">>>;  // Should print exactly 30 seconds
+
+// Should print exactly 30 seconds
+<<< "End of piece. Duration: " + (now - start)/second + " seconds">>>;
 
 // END
