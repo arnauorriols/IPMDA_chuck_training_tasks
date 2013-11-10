@@ -1,9 +1,9 @@
 
 Gain master => dac;
-Gain drums => dac;
-Gain melody => dac;
+Gain drums => master;
+Gain melody => master;
 
-0.9 => master.gain;
+0.8 => master.gain;
 0.7 => drums.gain;
 
 SndBuf kick => drums;
@@ -11,6 +11,9 @@ SndBuf kick2 => drums;
 SndBuf snare => drums;
 SndBuf hihat => drums;
 SndBuf hihat2 => drums;
+
+SinOsc sin1 => melody;
+480 => sin1.freq;
 
 ["kick_04.wav", "snare_03.wav", "hihat_01.wav"] @=> string filenames[];
 
@@ -139,7 +142,16 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
 
 if (numMeasure < 1) {
    0 => drums.gain;
+   0.7 => melody.gain;
+   0.5 => sin1.gain;
+   0 => int accelerandoTimer;
+   0.0 => float waveAmp;
+   Math.sin(2*pi*1 *  (now/second)-(pi/2)) * waveAmp => float gainWave;
+   sin1.gain() + gainWave => sin1.gain;
+   <<<sin1.gain()>>>;
+
 } else {
+    0.1 => melody.gain;
     0.8 => drums.gain;
 }
 loopRate => now;
