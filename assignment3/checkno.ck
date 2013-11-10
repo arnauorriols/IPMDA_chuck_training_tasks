@@ -145,7 +145,7 @@ if (numMeasure < 1) {
    0.7 => melody.gain;
    0.5 => sin1.gain;
    0 => int accelerandoTimer;
-   0.0 => float waveAmp;
+   0.4 => float waveAmp;
    Math.sin(2*pi*1 *  (now/second)-(pi/2)) * waveAmp => float gainWave;
    sin1.gain() + gainWave => sin1.gain;
    <<<sin1.gain()>>>;
