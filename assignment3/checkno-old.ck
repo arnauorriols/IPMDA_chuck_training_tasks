@@ -1,4 +1,3 @@
-
 Gain master => dac;
 
 Gain drums => master;
@@ -72,7 +71,7 @@ snare.samples()-snareArrayStart => int snareStart;
 12 => int octave;
 
 [0, 4, 2] @=> int index4Dm7[]; // Indexes for D minor 7 chord
-[-1, -1, 0] @=> int DM7Octaves[]; 
+[-1, -1, 0] @=> int DM7Octaves[];
 
 [3, 5, 0] @=> int index4Bdim7[]; // Indexes for B diminished with minor 7 chord
 [-2, -1, 0] @=> int Bdim7Octaves[];
@@ -112,10 +111,10 @@ int measureInComposition;
 int measureInHarmonyLoop;
 
 /* EXPLANATION
- * ===========
- * numX accounts for the absolute number that x has occurred
- * xInBar accounts for the position of x relative to the measure
- */
+* ===========
+* numX accounts for the absolute number that x has occurred
+* xInBar accounts for the position of x relative to the measure
+*/
 
 kickStart + (Std.ftoi(Std.sgn(kickRate)) * kick.samples()) => kick.pos;
 kick2Start + (Std.ftoi(Std.sgn(kick2.rate())) * kick2.samples()) => kick2.pos;
@@ -162,7 +161,7 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
                 }
             /* EIGHTH NOTES PLAYGROUND */
             if (eighthInBar == 7) {
-                hihatStart  => hihat2.pos;
+                hihatStart => hihat2.pos;
             }
 
             if (eighthInBar == 0 || eighthInBar == 6) {
@@ -232,4 +231,3 @@ if (numMeasure < 2) {
 }
 loopRate => now;
 }
-
