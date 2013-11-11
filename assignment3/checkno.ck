@@ -212,7 +212,7 @@ if (numMeasure < 2) {
     if (eighthInBar == 0
         || (eighthInBar == 7)){
         <<<"harmony plays!">>>;
-        0.7 => harmony.gain;
+        0.5 => harmony.gain;
         if (measureInHarmonyLoop == 0) {
             for (0 => int x; x < chords.cap(); x++) {
                 Std.mtof(dorianScale[index4Dm7[x]] + (DM7Octaves[x] * octave)) => chords[x].freq;
@@ -226,9 +226,9 @@ if (numMeasure < 2) {
     } else {
     0 => harmony.gain;
     }
-    0.05 => riff.gain;
-    0.0 => staticBass.gain;
-    0.2 => drums.gain;
+    0.04 => riff.gain;
+    0.1 => staticBass.gain;
+    0.4 => drums.gain;
 }
 loopRate => now;
 }
