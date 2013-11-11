@@ -3,7 +3,7 @@
  * Date: 11-11-2013
  */
 
-<<<"Assignment_3_CHECKNO">>>;
+<<<"Assignment_3_CHECKNOCRACY">>>;
 
 
 Pan2 master => dac;     // Master gain nob. It is a Pan2 object to keep the
@@ -172,7 +172,6 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
      */
     if (counter % (measure/loopRate) == 0) {
         numMeasure++;
-        <<<numMeasure>>>;
     }
 
     /* UPDATE COUNTERS AND DEFINE DRUMS RHYTHM */
@@ -210,7 +209,6 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
                     /* Play kick2 on quarters 3 and 7 (range 0 - 7) */
                     kickStart => kick2.pos;
                 }
-                <<<"quarter", quarterInBar>>>;
                 if (quarterInBar % 2 != 0) {
                     /* Play hihat every odd quarter (1, 3, 5 - range (0 - 7)) */
                     hihatStart => hihat.pos;
