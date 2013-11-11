@@ -3,11 +3,8 @@ Gain master => dac;
 
 Gain drums => master;
 Gain staticDrone => master;
-Gain harmony => master;
 Gain bass => master;
-
-0.9 => master.gain;
-0.7 => drums.gain;
+Gain riff => master;
 
 SndBuf kick => drums;
 SndBuf kick2 => drums;
@@ -17,18 +14,19 @@ SndBuf hihat2 => drums;
 
 SinOsc sin1 => staticDrone;
 SinOsc sin2 => staticDrone;
+0.45 => sin1.gain;
+0.45 => sin2.gain;
 
-TriOsc chords[3];
+SqrOsc b => bass;
+SawOsc b2 => bass;
 
-for (0 => int x; x <chords.cap(); x++) {
-    TriOsc o @=> chords[x];
-    1.0/chords.cap() => o.gain;
-    o => harmony;
-}
+0.45 => b.gain;
+0.45 => b2.gain;
 
-SqrOsc melody => bass;
-SawOsc melody2 => bass;
-1 => melody.gain;
+TriOsc r => riff;
+SawOsc r2 => riff;
+0.8 => r.gain;
+0.2 => r2.gain;
 
 
 ["kick_04.wav", "snare_03.wav", "hihat_01.wav"] @=> string filenames[];
@@ -57,7 +55,7 @@ snareGain => snare.gain;
 hihatRate => hihat.rate;
 hihatGain => hihat.gain;
 hihatRate => hihat2.rate;
-hihatGain - (hihat.gain()*0.4) => hihat2.gain;
+hihatGain - (hihat.gain()*0.6) => hihat2.gain;
 
 
 3000 => int snareArrayStart;
@@ -70,13 +68,6 @@ snare.samples()-snareArrayStart => int snareStart;
 // SCALE DEFINITION:
 [50, 52, 53, 55, 57, 59, 60] @=> int dorianScale[];
 12 => int octave;
-
-[0, 4, 2] @=> int index4Dm7[]; // Indexes for D minor 7 chord
-[-1, -1, 0] @=> int DM7Octaves[]; 
-
-[6, 3, 1] @=> int index4Bdim7[]; // Indexes for B diminished with minor 7 chord
-[-2, -1, 0] @=> int Bdim7Octaves[];
-
 
 // REQUIREMENTS
 30::second => dur maxDuration;
@@ -123,6 +114,7 @@ snareStart + (Std.ftoi(Std.sgn(snareRate)) * (snare.samples()-snareArrayStart)) 
 hihatStart + (Std.ftoi(Std.sgn(hihatRate)) * hihat.samples()) => hihat.pos;
 hihat2Start + (Std.ftoi(Std.sgn(hihat2.rate())) * hihat2.samples()) => hihat2.pos;
 
+0 => int droneModulation;
 
 for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
 
@@ -164,101 +156,96 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
             if (eighthInBar == 7) {
                 hihatStart  => hihat2.pos;
             }
-/*
-            if (eighthInBar == 0 || eighthInBar == 6) {
-                0.4 => melody.gain;
-                0.4 => melody2.gain;
-                Std.mtof(dorianScale[5]+ (2* octave)) => melody.freq;
-                Std.mtof(dorianScale[5] + (2 * octave))+10 => melody2.freq;
-            } else if (eighthInBar == 2 || (eighthInBar >= 7 && eighthInBar
-            <=9)) {
-                0.4 => melody.gain;
-                0.4 => melody2.gain;
-                Std.mtof(dorianScale[1] + (3 * octave)) => melody.freq;
-                Std.mtof(dorianScale[1] + (3 * octave))+10 => melody2.freq;
-            } else if (eighthInBar == 4 || eighthInBar == 11) {
-                0.4 => melody.gain;
-                0.4 => melody2.gain;
-                Std.mtof(dorianScale[5] + (3 * octave)) => melody.freq;
-                Std.mtof(dorianScale[5] + (3 * octave))-5 => melody2.freq;
-            } else {
-                0 => melody.gain;
-                0 => melody2.gain;
-            }
-*/
-
         }
         /* SIXTEENTH NOTES PLAYGROUND */
     }
     /* THIRTY-SECOND NOTES PLAYGROUND */
 
 if (numMeasure < 2) {
+    0.95 => master.gain;
     0 => drums.gain;
-    0 => harmony.gain;
     0 => bass.gain;
-    0.9 => staticDrone.gain;
-    0.3 => sin1.gain;
-    0.3 => sin2.gain;
-    60 => sin1.freq;
-    sin1.freq() + counter/5.5 => sin2.freq;
+    0 => riff.gain;
+    1 => staticDrone.gain;
+    Std.mtof(dorianScale[5] + (-2 * octave)) => sin1.freq;
+    sin1.freq() + (droneModulation/5.5) => sin2.freq;
+    droneModulation++;
 } else if (numMeasure == 2) {
-    1 => master.gain;
     0.5 => staticDrone.gain;
     0.5 => drums.gain;
 } else if (numMeasure > 2) {
 
+    0.1 => staticDrone.gain;
+    0.5 => drums.gain;
     (numMeasure-3) % 2 => measureInHarmonyLoop;
 
-    0.0 => harmony.gain;
     if (measureInHarmonyLoop == 0) {
         if (eighthInBar == 3) {
             Std.mtof(dorianScale[0] + (-1 * octave)) => float note;
-            note => melody.freq;
-            note - 5 => melody2.freq;
-            0.4 => melody.gain;
-            0.4 => melody2.gain;
+            note => b.freq;
+            note - 5 => b2.freq;
+            0.3 => bass.gain;
         } else if (eighthInBar == 8 || eighthInBar == 15) {
             Std.mtof(dorianScale[5] + (-2 * octave)) => float note;
-            note => melody.freq;
-            note - 5 => melody2.freq;
-            0.4 => melody.gain;
-            0.4 => melody2.gain;
+            note => b.freq;
+            note - 5 => b2.freq;
+            0.3 => bass.gain;
         } else {
-            0 => melody.gain;
-            0 => melody2.gain;
+            0 => bass.gain;
         }
-
-        /* for (0 => int x; x < chords.cap(); x++) {
-            Std.mtof(dorianScale[index4Dm7[x]] + (DM7Octaves[x] * octave)) => chords[x].freq;
-            <<<chords[x].freq()>>>;
-        }*/
 
     } else {
         if (eighthInBar == 3) {
             Std.mtof(dorianScale[1] + (-1 * octave)) => float note;
-            note => melody.freq;
-            note - 5 => melody2.freq;
-            0.4 => melody.gain;
-            0.4 => melody2.gain;
+            note => b.freq;
+            note - 5 => b2.freq;
+            0.3 => bass.gain;
         } else if (eighthInBar == 8 || eighthInBar == 15) {
             Std.mtof(dorianScale[2] + (-1 * octave)) => float note;
-            note => melody.freq;
-            note - 5 => melody2.freq;
-            0.4 => melody.gain;
-            0.4 => melody2.gain;
+            note => b.freq;
+            note - 5 => b2.freq;
+            0.3 => bass.gain;
         } else {
-            0 => melody.gain;
-            0 => melody2.gain;
+            0 => bass.gain;
         }
-        /* for (0 => int x; x < chords.cap(); x++) {
-            Std.mtof(dorianScale[index4Bdim7[x]] + (Bdim7Octaves[x] * octave)) => chords[x].freq;
-        }*/
-    0 => harmony.gain;
     }
-    0.3 => bass.gain;
-    0.1 => staticDrone.gain;
-    0.5 => drums.gain;
+
 }
+
+if (numMeasure > 6) {
+    (numEighth - (((quarter/eighth)*quarterForBar) * 7)) % 2 => float eighthInRiff;
+    if (eighthInBar == 0) {
+        Std.mtof(dorianScale[0] + (1 * octave)) => float noteRiff;
+        noteRiff => r.freq;
+        noteRiff + 10 => r2.freq;
+        0.1 => riff.gain;
+    } else if (eighthInBar == 1
+        || eighthInBar == 3
+        || eighthInBar == 7
+        || eighthInBar == 11
+        || eighthInBar == 15
+        ) {
+        Std.mtof(dorianScale[5] + (0 * octave)) => float noteRiff;
+        noteRiff => r.freq;
+        noteRiff + 5 => r2.freq;
+        0.1 => riff.gain;
+    }else {
+        0 => riff.gain;
+    }
+
+}
+
+if (numMeasure > 13) {
+    0 => drums.gain;
+    0 => bass.gain;
+    0 => riff.gain;
+    1 => staticDrone.gain;
+    if (sin2.freq() > sin1.freq()){
+    sin1.freq() + (droneModulation/5.5) => sin2.freq;
+    droneModulation - 3 => droneModulation;
+    }
+}
+
 loopRate => now;
 }
 
