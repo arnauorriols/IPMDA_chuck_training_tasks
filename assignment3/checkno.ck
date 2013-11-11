@@ -1,9 +1,12 @@
 
 Gain master => dac;
-Gain drums => master;
-Gain melody => master;
 
-0.8 => master.gain;
+Gain drums => master;
+Gain staticBass => master;
+Gain harmony => master;
+Gain riff => master;
+
+0.9 => master.gain;
 0.7 => drums.gain;
 
 SndBuf kick => drums;
@@ -12,8 +15,21 @@ SndBuf snare => drums;
 SndBuf hihat => drums;
 SndBuf hihat2 => drums;
 
-SinOsc sin1 => melody;
-480 => sin1.freq;
+SinOsc sin1 => staticBass;
+SinOsc sin2 => staticBass;
+
+TriOsc chords[3];
+
+for (0 => int x; x <chords.cap(); x++) {
+    TriOsc o @=> chords[x];
+    1.0/chords.cap() => o.gain;
+    o => harmony;
+}
+
+SqrOsc melody => riff;
+SawOsc melody2 => riff;
+1 => melody.gain;
+
 
 ["kick_04.wav", "snare_03.wav", "hihat_01.wav"] @=> string filenames[];
 
@@ -50,6 +66,18 @@ hihatGain - (hihat.gain()*0.4) => hihat2.gain;
 snare.samples()-snareArrayStart => int snareStart;
 0 => int hihatStart;
 0 => int hihat2Start;
+
+// SCALE DEFINITION:
+[50, 52, 53, 55, 57, 59, 60] @=> int dorianScale[];
+12 => int octave;
+
+[0, 4, 2] @=> int index4Dm7[]; // Indexes for D minor 7 chord
+[-1, -1, 0] @=> int DM7Octaves[]; 
+
+[3, 5, 0] @=> int index4Bdim7[]; // Indexes for B diminished with minor 7 chord
+[-2, -1, 0] @=> int Bdim7Octaves[];
+
+
 // REQUIREMENTS
 30::second => dur maxDuration;
 250::ms => dur quarter;
@@ -81,6 +109,7 @@ int eighthInBar;
 int quarterInBar;
 int halfInBar;
 int measureInComposition;
+int measureInHarmonyLoop;
 
 /* EXPLANATION
  * ===========
@@ -135,24 +164,71 @@ for( 0 => int counter; counter::loopRate < maxDuration; counter++) {
             if (eighthInBar == 7) {
                 hihatStart  => hihat2.pos;
             }
+
+            if (eighthInBar == 0 || eighthInBar == 6) {
+                0.4 => melody.gain;
+                0.4 => melody2.gain;
+                Std.mtof(dorianScale[0]+ (2 * octave)) => melody.freq;
+                Std.mtof(dorianScale[0] + (2 * octave))+10 => melody2.freq;
+            } else if (eighthInBar == 2 || (eighthInBar >= 7 && eighthInBar
+            <=9)) {
+                0.4 => melody.gain;
+                0.4 => melody2.gain;
+                Std.mtof(dorianScale[4] + (2 * octave)) => melody.freq;
+                Std.mtof(dorianScale[4] + (2 * octave))+10 => melody2.freq;
+            } else if (eighthInBar == 4 || eighthInBar == 11) {
+                0.4 => melody.gain;
+                0.4 => melody2.gain;
+                Std.mtof(dorianScale[6] + (2 * octave)) => melody.freq;
+                Std.mtof(dorianScale[6] + (2 * octave))-5 => melody2.freq;
+            } else {
+                0 => melody.gain;
+                0 => melody2.gain;
+            }
+
+
         }
         /* SIXTEENTH NOTES PLAYGROUND */
     }
     /* THIRTY-SECOND NOTES PLAYGROUND */
 
-if (numMeasure < 1) {
-   0 => drums.gain;
-   0.7 => melody.gain;
-   0.5 => sin1.gain;
-   0 => int accelerandoTimer;
-   0.4 => float waveAmp;
-   Math.sin(2*pi*1 *  (now/second)-(pi/2)) * waveAmp => float gainWave;
-   sin1.gain() + gainWave => sin1.gain;
-   <<<sin1.gain()>>>;
+if (numMeasure < 2) {
+    0 => drums.gain;
+    0 => harmony.gain;
+    0 => riff.gain;
+    0.9 => staticBass.gain;
+    0.3 => sin1.gain;
+    0.3 => sin2.gain;
+    60 => sin1.freq;
+    sin1.freq() + counter/5.5 => sin2.freq;
+} else if (numMeasure == 2) {
+    1 => master.gain;
+    0.5 => staticBass.gain;
+    0.5 => drums.gain;
+} else if (numMeasure > 2) {
 
-} else {
-    0.1 => melody.gain;
-    0.8 => drums.gain;
+    (numMeasure-3) % 4 => measureInHarmonyLoop;
+
+    if (eighthInBar == 0
+        || (eighthInBar == 7)){
+        <<<"harmony plays!">>>;
+        0.7 => harmony.gain;
+        if (measureInHarmonyLoop == 0) {
+            for (0 => int x; x < chords.cap(); x++) {
+                Std.mtof(dorianScale[index4Dm7[x]] + (DM7Octaves[x] * octave)) => chords[x].freq;
+                <<<chords[x].freq()>>>;
+            }
+        } else if (measureInHarmonyLoop == 2) {
+            for (0 => int x; x < chords.cap(); x++) {
+                Std.mtof(dorianScale[index4Bdim7[x]] + (Bdim7Octaves[x] * octave)) => chords[x].freq;
+            }
+        }
+    } else {
+    0 => harmony.gain;
+    }
+    0.05 => riff.gain;
+    0.0 => staticBass.gain;
+    0.2 => drums.gain;
 }
 loopRate => now;
 }
