@@ -3,7 +3,7 @@
  * Date: 11-11-2013
  */
 
-<<<"Assignment_3_CHECKNOCRACY">>>;
+<<<"Assignment_3_CHUCKNOCRACY">>>;
 
 
 Pan2 master => dac;     // Master gain nob. It is a Pan2 object to keep the
