@@ -1,3 +1,16 @@
+/* ATENTION:
+ * This got out of hands, and haven't got much time to clean this mess. This
+ * needs some real cleaning work, which I'll do in the following days. It
+ * works, but I understand this code is not readable at all, I appologise for
+ * it.
+ * 
+ * Basically, the idea was to use functions to build some chords and arpeggios
+ * having the root note. The more important functions are setChords,
+ * buildChord, setEnvelope, and buildArpeggiatoMelody, which is really cool
+ * cause it doesn't display all the arpeggios in the standard inversion, but
+ * picks randomly which note of the chord to start, thus every time you play it
+ * creates a different melody
+ */
 4 => int quartersMeasure;
 
 .6::second => dur quarter;
@@ -11,6 +24,7 @@ eighth + sixteenth => dur dEighth;
 sixteenth => dur beat;
 1::ms => dur loopRate;
 
+Std.ftoi(half/beat) => float halfPerBeat;
 Std.ftoi(quarter/beat) => float quarterPerBeat;
 Std.ftoi(eighth/beat) => float eighthPerBeat;
 Std.ftoi(sixteenth/beat) => float sixteenthPerBeat;
@@ -21,8 +35,10 @@ Std.ftoi(sixteenth/beat) => float sixteenthPerBeat;
  */
 [[[eighthPerBeat, eighthPerBeat, sixteenthPerBeat, eighthPerBeat,
 sixteenthPerBeat, eighthPerBeat, sixteenthPerBeat, eighthPerBeat,
-sixteenthPerBeat, eighthPerBeat], [0.0, 0.4, .0, 0.6, .0, 0.9, .0, 0.5, .0, 0.3]]]
-@=> float
+sixteenthPerBeat, eighthPerBeat], [0.0, 0.4, .0, 0.6, .0, 0.9, .0, 0.5, .0,
+0.3]], [[eighthPerBeat, sixteenthPerBeat, eighthPerBeat, sixteenthPerBeat,
+eighthPerBeat], [0.6, 0.0, 0.9, 0.0, 0.6]], [[quarterPerBeat+(3*
+sixteenthPerBeat), sixteenthPerBeat], [0.3, 0]]] @=> float
 rhythmPatterns[][][];
 fun float getFreq (int midiNote) {
     return Std.mtof(midiNote);
@@ -103,7 +119,10 @@ fun float[][][] setChords(int roots[], string mode[], int notesChord, dur rhythm
                 chords[currentSample];    // Returns array with each note freq
             } else {
                 /* if root note is 0, means silence */
-                [[0.0, 0.0, 0.0],[0.0, 0.0, 0.0]] @=> chords[currentSample];
+                for (0 => int noteChord; noteChord < notesChord; noteChord++){
+                    [0.0, 0.0] @=>
+                    chords[currentSample][noteChord];
+                }
             }
                  } else {
                      <<<"Error filling chords array. Out of bounds!">>>;
@@ -131,7 +150,6 @@ duration, int attackTime, int releaseTime, float attackGain, float mantainGain) 
     Std.ftoi(numSamples * (releaseTime/100.0)) => float releaseSamples;
     attackGain * sharedGain => float attackGain;
     mantainGain * sharedGain => float mantainGain;
-    <<<attackGain*5, mantainGain*5>>>;
     for (0 => int x; x < numSamples; x++) {
         positionInArray + x => int indexSamples;
 
@@ -264,21 +282,17 @@ arpeggioMode[], dur rhythm[]) {
                          0 => noteCounter;
                          0 => octave;
                      }
-
              }
-
             }
         }
             0 => int currentSixteenth;
             0 => int sixteenthCounter;
         for (0 => int x; x < melody.cap(); x++) {
-                if (x % rtolr(measure) == 0){
+                if (x % rtolr(rhythm[0]) == 0){
                     0 => sixteenthCounter;
                 }
 
-
             if (x % rtolr(sixteenth) == 0) {
-                <<<x % rtolr(rhythm[0]), sixteenthCounter>>>;
             float gain;
             if (sixteenthCounter % 3 == 0) {
                 0.25 => gain;
@@ -301,42 +315,184 @@ arpeggioMode[], dur rhythm[]) {
     }
 }
 
+[53, 49, 56, 51] @=> int rootsA[];
+[53, 49, 56, 60] @=> int rootsAp[];
+[37, 41, 44, 48] @=> int rootsB[];
+[49, 53, 56, 51] @=> int rootsBp[];
+[0] @=> int rootFinal[];
+[77] @=> int rootFinalMelody[];
 
-
-[50, 46, 53, 48] @=> int rootsA[];
 ["m", "M", "M", "M"] @=> string modesA[];
+["m", "M", "M", "m"] @=> string modesAp[];
+["M", "m", "M", "m"] @=> string modesB[];
+["M", "m", "M", "M"] @=> string modesBp[];
+["m"] @=> string modeFinal[];
+
 [measure, measure, measure, measure] @=> dur rhythmChordsA[];
+rhythmChordsA @=> dur rhythmChordsAp[];
+
+[half, half, half, half] @=> dur rhythmChordsB[];
+rhythmChordsB @=> dur rhythmChordsBp[];
+
+[half] @=> dur rhythmFinal[];
+
 5 => int numNotesChord;
 
 TriOsc chordOsc[numNotesChord];
+Pan2 chordPan => dac;
 for (0 => int x; x < numNotesChord; x++) {
 TriOsc o @=> chordOsc[x];
-    o => dac;
+    o => chordPan;
     (1.0/numNotesChord) => o.gain;
 }
 
-SqrOsc melodyOsc => dac;
+-0.5 => chordPan.pan;
+
+SqrOsc melodyOsc => Pan2 melodyPan => dac;
+
+Pan2 drumsPan => dac;
+SndBuf hihat => drumsPan;
+SndBuf kick => drumsPan;
+SndBuf kick2 => drumsPan;
+SndBuf snare => drumsPan;
+SndBuf crash => drumsPan;
+
+0.5 => drumsPan.pan;
+
+me.dir() + "/audio/hihat_02.wav" => hihat.read;
+me.dir() + "/audio/kick_03.wav" => kick.read;
+me.dir() + "/audio/kick_03.wav" => kick2.read;
+me.dir() + "/audio/snare_01.wav" => snare.read;
+me.dir() + "/audio/hihat_04.wav" => crash.read;
+
+0 => hihat.gain;
+0 => kick.gain;
+0 => kick2.gain;
+0 => snare.gain;
+1.2 => hihat.rate;
+0.8 => kick.rate;
+0.7 => kick2.rate;
+0.75 => crash.rate;
+
+hihat.samples() => hihat.pos;
+kick.samples() => kick.pos;
+kick2.samples() => kick2.pos;
+snare.samples() => snare.pos;
+crash.samples() => crash.pos;
 
 setChords(rootsA, modesA, numNotesChord, rhythmChordsA) @=> float
 chordsSectionA[][][];
 setRhythmPattern(chordsSectionA, rhythmPatterns[0]);
 
+setChords(rootsAp, modesAp, numNotesChord, rhythmChordsAp) @=> float
+chordsSectionAp[][][];
+setRhythmPattern(chordsSectionAp, rhythmPatterns[0]);
+
+setChords(rootsB, modesB, numNotesChord, rhythmChordsB) @=> float
+chordsSectionB[][][];
+setRhythmPattern(chordsSectionB, rhythmPatterns[1]);
+
+setChords(rootsBp, modesBp, numNotesChord, rhythmChordsBp) @=> float
+chordsSectionBp[][][];
+setRhythmPattern(chordsSectionBp, rhythmPatterns[1]);
+
+setChords(rootFinal, modeFinal, numNotesChord, rhythmFinal) @=> float
+chordsFinal[][][];
+setChords(rootFinalMelody, modeFinal, 3, rhythmFinal) @=> float melodyFinal[][][];
+//setRhythmPattern(chordsFinal, rhythmPatterns[2]);
+setEnvelope(melodyFinal, 0, Std.ftoi(quarterPerBeat+(3 * sixteenthPerBeat)),
+2, 80, 0.7, 0.5);
+
 buildArpeggiatoMelody(rootsA, modesA, rhythmChordsA) @=> float
 melodySectionA[][][];
 
-    for (0 => int iteration; iteration < 4; iteration++) {
-for (0 => int x; x < chordsSectionA.cap(); x++) {
+buildArpeggiatoMelody(rootsAp, modesAp, rhythmChordsAp) @=> float
+melodySectionAp[][][];
+
+buildArpeggiatoMelody(rootsB, modesB, rhythmChordsB) @=> float
+melodySectionB[][][];
+
+buildArpeggiatoMelody(rootsBp, modesBp, rhythmChordsBp) @=> float
+melodySectionBp[][][];
+
+
+now => time start;
+
+<<<"Assignment_4_Heavening">>>;
+
+for (0 => int numSection; numSection < 5; numSection++) {
+
+        float chordsSection[][][];
+        float melodySection[][][];
+            if (numSection == 0) {
+                chordsSectionA @=> chordsSection;
+                melodySectionA @=> melodySection;
+                0.03 => hihat.gain;
+            } else if (numSection == 1) {
+                chordsSectionB @=> chordsSection;
+                melodySectionB @=> melodySection;
+                0.3 => kick.gain;
+            } else if (numSection == 2) {
+                chordsSectionBp @=> chordsSection;
+                melodySectionBp @=> melodySection;
+                0.4 => snare.gain;
+            } else if (numSection == 3) {
+                chordsSectionAp @=> chordsSection;
+                melodySectionAp @=> melodySection;
+                0.5 => snare.gain;
+                0.2 => kick2.gain;
+            } else if (numSection == 4) {
+                chordsFinal @=> chordsSection;
+                melodyFinal @=> melodySection;
+                0 => hihat.gain;
+                0 => kick.gain;
+                0 => kick2.gain;
+                0 => snare.gain;
+                0 => crash.gain;
+                0 => crash.pos;
+            }
+
+for (0 => int x; x < chordsSection.cap(); x++) {
+
+        if (x % rtolr(sixteenth) == 0) {
+            0 => hihat.pos;
+        }
+        if (x % rtolr(quarter) == 0) {
+            0 => kick.pos;
+            if (x % rtolr(half) != 0) {
+                0 => snare.pos;
+            }
+        }
+        if ((numSection == 2 && x % rtolr(measure*2) >
+            rtolr((measure*2)-eighth))||(numSection == 3 && x % rtolr(measure) >
+            rtolr(measure-(3*(sixteenth/2))))) {
+            if (x % rtolr(sixteenth/2) == 0) {
+                0 => hihat.pos;
+            }
+        }
+
+        if (x % rtolr(half) == rtolr(3*sixteenth) || x % rtolr(half) ==
+            rtolr(3*eighth)) {
+            0 => kick2.pos;
+        }
+
+        if (x % rtolr(measure) == 0) {
+            Math.random2f(-0.3, 0.3) => melodyPan.pan;
+        }
 
 
         for (0 => int y; y < chordsSectionA[x].cap(); y++) {
-            chordsSectionA[x][y][0] => chordOsc[y].freq;
-            chordsSectionA[x][y][1] * 4=> chordOsc[y].gain;
+            chordsSection[x][y][0] => chordOsc[y].freq;
+            chordsSection[x][y][1] * 4=> chordOsc[y].gain;
 
         }
-            melodySectionA[x][0][0] => melodyOsc.freq;
-            melodySectionA[x][0][1]*0.15 => melodyOsc.gain;
+            melodySection[x][0][0] => melodyOsc.freq;
+            melodySection[x][0][1]*0.15 => melodyOsc.gain;
             if (x % (rtolr(sixteenth)) == 50) {
             }
             loopRate => now;
+
     }
 }
+
+<<<((now-start)/second)>>>;
