@@ -1,4 +1,11 @@
-VoicForm v => Chorus vChorus => dac;
+VoicForm v => Chorus vChorus => NRev rev => dac;
+
+vChorus => Gain feedback => Delay d => vChorus;
+
+0.7 => feedback.gain;
+0.15::second => d.max;
+0.15::second => d.delay;
+0.005 => rev.mix;
 
 880 => v.freq;
 0.0001 => v.pitchSweepRate;
@@ -11,5 +18,5 @@ while( true ){
     1 => v.speak;
     0.5::second => now;
     1 => v.quiet;
-    0.4::second => now;
+    0.8::second => now;
 }
