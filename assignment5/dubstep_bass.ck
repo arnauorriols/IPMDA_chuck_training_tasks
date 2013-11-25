@@ -20,18 +20,22 @@ fun void screamGain(Gain gainKnob, string label) {
     }
 }
 
+fun void screamDac() {
+    if (Std.fabs(dac.last()) > 1) {
+        <<<"ERROR! DAC too loud (", dac.last(), ")">>>;
+    }
+}
+
 fun int changeOctave(int midiNote, int octaveDistance) {
     return (midiNote + (12 * octaveDistance));
 }
 
 fun float centsInterval(float initialFreq, int cents) {
-    <<<Math.pow(2, (cents/1200.0))>>>;
     return (initialFreq * Math.pow(2, (cents/1200.0)));
 }
 
-
 // SCALE DEFINITION (Db Phrygian mode)
-[49, 50, 52, 54, 56, 57, 59] @=> int midiScale[];
+[49, 50, 52, 54, 56, 57, 59, 61] @=> int midiScale[];
 
 /* DURATIONS DEFINITION
  * Requirement: quarter at 0.75 second
@@ -42,20 +46,39 @@ roundDur((quarterSec * constant)::second, 16) => dur quarter;
 quarter * 4 => dur measure;
 measure / 2 => dur half;
 quarter / 2 => dur eighth;
+quarter / 3 => dur triplet;
 eighth / 2 => dur sixteenth;
 4::samp => dur beattime;
-
+<<<quarter/second>>>;
 // sound chain
 
 // Master sound chain: rev, master gain and to dac
-JCRev rev => Gain master => dac;
-0.9 => master.gain;
-0.04=> rev.mix;
+Pan2 master => dac;
+JCRev revl => master.left;
+JCRev revr => master.right;
+0.75 => master.gain;
+0.04=> revl.mix;
+0.04=> revr.mix;
 
-Noise n => LPF nFilter=> rev;
-0.6 => n.gain;
-60 => nFilter.freq;
-10 => nFilter.Q;
+Noise n => LPF nFilter => Pan2 nPan;
+nPan.left => revl;
+nPan.right => revr;
+-0.9 => nPan.pan;
+60 => int nFiltFreq;
+10 => int nFiltQ;
+0.1 => n.gain;
+nFiltFreq => nFilter.freq;
+nFiltQ => nFilter.Q;
+
+// GROOVE filter: to control open/close sound of the groove
+LPF grooveFilter => Pan2 groovePan;
+groovePan.left => revl;
+groovePan.right => revr;
+0.2 => groovePan.pan;
+22000 => int GFFreq;
+8 => int GFQ;
+GFFreq => grooveFilter.freq;
+GFQ => grooveFilter.Q;
 
 /* BASS OSCS
  *  - 2 couples of Osc (car/detunedCar), each with different low-frequency filter, modulated
@@ -71,7 +94,7 @@ SinOsc mod;
 SinOsc mod2;
 
 // Bass sound chain
-Gain bassGain => rev;
+Gain bassGain => grooveFilter;
 car => ADSR env =>  LPF filter => bassGain;
 detunedCar => env;
 car2 => ADSR env2 =>  LPF filter2 => bassGain;
@@ -114,7 +137,7 @@ mod2 => ADSR filterEnv2 => blackhole;
  * Kick, snare, hihat and clap. Each one with its own delay (for swinging a
  * little bit) and different filters/shifters to achieve the expected sound
  */
-Gain drumsGain => rev;
+Gain drumsGain => grooveFilter;
 SndBuf kick => LPF kickFilter => PitShift kickShift => Delay kickDelay => drumsGain;
 SndBuf snare => Delay snareDelay => drumsGain;
 SndBuf hihat => PitShift hiShift => Delay hiDelay => drumsGain;
@@ -154,15 +177,35 @@ sixteenth/2.5 => kickDelay.max => kickDelay.delay;
 sixteenth/3 => hiDelay.max => hiDelay.delay;
 sixteenth/1 => clapDelay.max => clapDelay.delay;
 
+// MELODY SOUND CHAIN
+Moog melody => Gain melodyGain => JCRev melodyRev => Delay mDelay => Pan2 mPan;
+mPan.left => revl;
+mPan.right => revr;
+
+-0.3 => mPan.pan;
+
+0.5 * triplet => mDelay.max =>  mDelay.delay;
+0.2 => melodyRev.mix;
+0.8 => melodyGain.gain;
+0.8 => melody.gain;
+<<<melody.vibratoFreq(), melody.vibratoGain()>>>;
+0.5 => melody.filterQ;
+0.7 => melody.filterSweepRate;
+0.02 => melody.vibratoGain;
 /* Drums pattern definition:
  * resolution: 16/measure (sixteenth note)
  * 2D array:
  *      [[kick],[snare],[clap],[hihat]]
  */
-[[1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 0],
- [0, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0],
- [0, 0, 0, 0,  0, 0, 1, 1,  0, 0, 0, 0,  0, 0, 1, 0],
- [0, 0, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0]] @=> int drumsPattern[][];
+[[[1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 0],
+  [0, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0],
+  [0, 0, 0, 0,  0, 0, 1, 1,  0, 0, 0, 0,  0, 0, 1, 0],
+  [0, 0, 1, 0,  0, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0]],
+  
+ [[1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 1, 0,  0, 0, 0, 0],
+  [1, 0, 0, 0,  0, 0, 1, 0,  0, 0, 1, 0,  0, 0, 1, 0],
+  [0, 0, 0, 0,  0, 0, 0, 1,  1, 0, 0, 1,  1, 0, 0, 1],
+  [1, 0, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0,  1, 1, 0, 0]]]@=> int drumsPattern[][][];
 
 fun void playDrums(int _beatInLoop, int pattern[][]){
 
@@ -186,19 +229,56 @@ fun void playDrums(int _beatInLoop, int pattern[][]){
     }
 }
 
+[[-1, -1, -1,   -1, -1, -1,   -1, -1, -1,   4,  4,  4,
+   6,  6,  6,    6,  6,  6,    6,  6,  7,   7,  7,  7,
+   6,  6,  6,    6,  6,  6,   -1, -1, -1,  -1,  5,  4,
+   3,  3,  3,    3,  3,  3,    2,  2,  2,   2,  2,  2],
+
+ [ 4,  4,  4,    4,  4,  4,    4,  4,  4,   4,  4,  4,
+  -1, -1, -1,   -1, -1, -1,   -1, -1, -1,   4,  4,  4,
+   6,  6,  6,    6,  6,  6,   -1, -1, -1,  -1,  5,  4,
+   3,  3,  3,    3,  3,  3,    2,  2,  2,   2,  2,  2]] @=> int melodyNotes[][];
+
+
+fun void playMelody(int beatInLoop, int notes[]) {
+   if (beatInLoop % Std.ftoi(triplet/beattime) == 0.0) {
+
+       Std.ftoi(beatInLoop / (triplet/beattime)) => int tripletInLoop;
+       if (notes[tripletInLoop] >= 0){
+           if (tripletInLoop != 0) {
+               if (notes[tripletInLoop] != notes[tripletInLoop-1]){
+                   Std.mtof(midiScale[notes[tripletInLoop]]) => melody.freq;
+                   Math.random2f(0.7, 0.8) => melody.noteOn;
+               }
+           } else {
+               if (beatInLoop == 0) {
+               Std.mtof(midiScale[notes[tripletInLoop]]) => melody.freq;
+               0.7 => melody.noteOn;
+               }
+           }
+       } else {
+           0.01 => melody.noteOff;
+       }
+   }
+}
+
+
+
 
 /* MAIN PROGRAM */
-
+now => time start;
+start + 31::second => time maxComp;
 0 => int beat;
 
-while( true )
+for(0 => int bassLoop; bassLoop < 4; bassLoop++){
+    for(0 => int beat; beat < 4 * (measure/beattime); beat++)
 {
     beat % Std.ftoi(4 * (measure/beattime)) => int beatInLoop;
-    playDrums(beatInLoop, drumsPattern);
+    playDrums(beat, drumsPattern[0]);
 
     0.0 => float freqToPlay;
 
-    if (beatInLoop == 0){
+    if (beat == 0){
         Std.mtof(changeOctave(midiScale[4], -1)) => freqToPlay;
         freqToPlay => car.freq;
         centsInterval(freqToPlay*2, -22)  => detunedCar.freq; // -22 cents
@@ -208,7 +288,7 @@ while( true )
         1 => env.keyOn => env2.keyOn;
         1 => filterEnv.keyOn;
         1 => filterEnv2.keyOn;
-    } else if (beatInLoop == Std.ftoi(measure/beattime)){
+    } else if (beat == Std.ftoi(measure/beattime)){
         Std.mtof(changeOctave(midiScale[4], -1)) => freqToPlay;
         freqToPlay => car.freq;
         centsInterval(freqToPlay*2, -22)  => detunedCar.freq;
@@ -218,8 +298,8 @@ while( true )
         1 => env.keyOn => env2.keyOn;
         1 => filterEnv.keyOn;
         1 => filterEnv2.keyOn;
-    } else if (beatInLoop ==  2* Std.ftoi(measure/beattime)){
-        centsInterval(Std.mtof(changeOctave(midiScale[5], -1)), -40) => freqToPlay;
+    } else if (beat ==  2* Std.ftoi(measure/beattime)){
+        centsInterval(Std.mtof(changeOctave(midiScale[5], -1)), -30) => freqToPlay;
         freqToPlay => car.freq;
         centsInterval(freqToPlay*2, -22)  => detunedCar.freq;
         freqToPlay => car2.freq;
@@ -228,8 +308,8 @@ while( true )
         1 => env.keyOn => env2.keyOn;
         1 => filterEnv.keyOn;
         1 => filterEnv2.keyOn;
-    } else if (beatInLoop == 3 * (measure/beattime)){
-        centsInterval(Std.mtof(changeOctave(midiScale[3], -1)), -40) => freqToPlay;
+    } else if (beat == 3 * (measure/beattime)){
+        centsInterval(Std.mtof(changeOctave(midiScale[3], -1)), -45) => freqToPlay;
         freqToPlay => car.freq;
         centsInterval(freqToPlay, -22)  => detunedCar.freq;
         freqToPlay => car2.freq;
@@ -250,9 +330,62 @@ while( true )
 
     filterEnv.last() + filterCutoff   => filter.freq;
     filterEnv2.last() + filter2Cutoff   => filter2.freq;
-    screamGain(master, "master");
+    screamDac();
+    //screamGain(master, "master");
     //screamGain(bassGain, "bassGain");
     //screamGain(drumsGain, "drumsGain");
     beattime => now;
-    beat++;
+
+    if (bassLoop == 1) {
+        if (beat % (sixteenth/beattime) == 0){
+            2 => grooveFilter.Q;
+            5.2 * Math.pow((beat / (sixteenth/beattime)) - 64, 2) + 600 => grooveFilter.freq;
+            groovePan.pan() + (0.25 / 64) => groovePan.pan;
+        }
+    } else if (bassLoop == 2) {
+        1 => grooveFilter.Q;
+        0.7 => grooveFilter.gain;
+        playMelody(beat, melodyNotes[0]);
+    } else if (bassLoop == 3) {
+        if (beat % (sixteenth/beattime) == 0){
+            nFilter.freq() + 70 => nFilter.freq;
+            n.gain() + (0.55 / 64) => n.gain;
+            nPan.pan() + (0.9 / 64) => nPan.pan;
+            8 => nFilter.Q;
+            0.1 => nFilter.gain;
+            grooveFilter.freq() + 20 => grooveFilter.freq;
+        }
+        playMelody(beat, melodyNotes[1]);
+    }
 }
+}
+GFFreq => grooveFilter.freq;
+GFQ => grooveFilter.Q;
+1 => grooveFilter.gain;
+nFiltFreq => nFilter.freq;
+nFiltQ => nFilter.Q;
+0 => nFilter.gain;
+0.1 => groovePan.pan;
+-0.4 => mPan.pan;
+
+
+for(0 => int beat; now < maxComp; beat++) {
+    if (beat < (4 * (quarter/beattime))) {
+        if (beat == 0) {
+            Std.mtof(midiScale[0]) => melody.freq;
+            0.8 => melody.noteOn;
+        }
+        playDrums(beat, drumsPattern[1]);
+    } else if (beat == 4 * (quarter/beattime)) {
+        0 => kick.pos;
+        0 => snare.pos;
+        0 => clap.pos;
+        0 => hihat.pos;
+        .1 => melody.noteOff;
+        0 => subBass.gain;
+
+    }
+
+beattime => now;
+}
+<<<now/second>>>;
