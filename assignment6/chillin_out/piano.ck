@@ -1,9 +1,11 @@
+// Assignment_6_Chillin'_out
+
 Rhodey piano[4];
 Pan2 pianoPan[4];
 
 Chorus c => Delay d => JCRev rev => Pan2 pan => dac;
 
-0.5 => pan.gain;
+0.8 => pan.gain;
 0.4 => pan.pan;
 0.15 => rev.mix;
 0.03 => c.modDepth;
@@ -68,7 +70,6 @@ fun void playChords(int base, int version) {
         Std.mtof(melNote) => piano[3].freq;
         swing => d.delay;
         pianoOn(0.2);
-        <<<piano[3].freq()>>>;
         dEighth => now;
         pianoOff();
         sixteenth => now;
@@ -77,7 +78,6 @@ fun void playChords(int base, int version) {
         Std.mtof(melNote) => piano[3].freq;
         0::second => d.delay;
         pianoOn(0.15);
-        <<<piano[3].freq()>>>;
         sixteenth => now;
         pianoOff();
         sixteenth => now;
@@ -85,8 +85,7 @@ fun void playChords(int base, int version) {
         correctOctave(base, melNote) => melNote;
         Std.mtof(melNote) => piano[3].freq;
         sixteenth * Math.random2f(0.4, 0.6) => d.delay;
-        pianoOn(0.25);
-        <<<piano[3].freq()>>>;
+        pianoOn(0.20);
         quarter => now;
         pianoOff();
         eighth => now;

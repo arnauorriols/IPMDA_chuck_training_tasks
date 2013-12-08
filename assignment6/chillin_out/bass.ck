@@ -1,11 +1,13 @@
+// Assignment_6_Chillin'_out
+
 Mandolin bass => Delay d => NRev rev => Pan2 pan => dac;
 0.05 => rev.mix;
-0.9 => pan.gain;
+0.8 => pan.gain;
 -0.3 => pan.pan;
 
 
 
-// Db Aeolian scale
+// Bb Aeolian scale
 [46, 48, 49, 51, 53, 54, 56, 58] @=> int midiScale[];
 
 // Bass sequence
@@ -45,24 +47,21 @@ fun void playFundamentals(int note) {
     }
     Std.mtof(changeOctave(note, octave)) => bass.freq;
     Math.random2f(0.4, 0.6) => bass.pluckPos;
-    Math.random2f(0.1, 0.5) => float on;
+    Math.random2f(0.2, 0.6) => float on;
     on => bass.noteOn;
-    <<<"first", on>>>;
     swing => d.delay;
     eighth => now;
     0.0001 => bass.noteOff;
     quarter => now;
-    Math.random2f(0.05, 0.3) => on;
+    Math.random2f(0.15, 0.4) => on;
     Math.random2f(1.4, 1.8) * swing => d.delay;
     on => bass.noteOn;
-    <<<"Second", on>>>;
     eighth => now;
     0.0001 => bass.noteOff;
     quarter => now;
-    Math.random2f(0.2, 0.6) => on;
+    Math.random2f(0.3, 0.7) => on;
     swing * 1.2 => d.delay;
     on => bass.noteOn;
-    <<<"Third", on>>>;
     dEighth => now;
     0.001 => bass.noteOff;
     sixteenth => now;
