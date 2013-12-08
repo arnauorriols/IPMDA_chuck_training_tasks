@@ -8,9 +8,9 @@ public class HarmCtl {
                                 // static strings
 
     50 => static int fundamental;
-    2 => static int globalOctave;
-    2 => int localOctave;
-    2 => int lastOctave;
+    2 => static int globalOctave;// octave of the global fundamental
+    2 => int localOctave;       // octave in the concret object
+    2 => int lastOctave;        // last octave used
     [50, 52, 53, 55, 57, 59, 60] @=> int scale[]; // Default: Aeolian D
 
     /* Associative array, more convinient and readable */
@@ -127,7 +127,7 @@ public class HarmCtl {
 
 HarmCtl h;
 
-h.setScale("C#4", "phrygian");
+h.setScale("C#4", "mixolydian");
 h.buildScale(2);
 
 for (0 => int z; z < h.scale.cap(); z++) {
