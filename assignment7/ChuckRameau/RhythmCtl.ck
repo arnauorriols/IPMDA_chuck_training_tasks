@@ -1,15 +1,15 @@
 public class RhythmCtl {
 
     // Member variables
-    120 => int bpm;     // beats per minute
-    60 / bpm => float spb;    // seconds per beat
+    static int bpm;     // beats per minute
+    60.0 / bpm => float spb;    // seconds per beat
 
-    dur quarter, eighth, sixteenth, thirtysecond;
-    dur measure, loop, section, composition;
+    static dur half, quarter, eighth, sixteenth, thirtysecond;
+    static dur measure, loop, section, composition;
 
-    int numSections, loopsPerSection, measuresPerLoop, beatsPerMeasure;
+    static int numSections, loopsPerSection, measuresPerLoop, beatsPerMeasure;
 
-    4 => int beatAssign;    // 4 => quarter is beat, 8 eighth, 16 sixteenth...
+    static int beatAssign;    // 4 => quarter is beat, 8 eighth, 16 sixteenth...
 
     25 => int swingPercent; // Deprecate?
 
@@ -26,7 +26,9 @@ public class RhythmCtl {
         updateRhythms(spb);
     }
 
-    /* CALLABLE */
+    /* CALLABLE
+     * ATENTION: MUST BE CALLED BEFORE setTempo
+     */
     fun void setMeter(int numBeats, int beatRhythm) {
         numBeats => beatsPerMeasure;
         changeBeatAssign(beatRhythm);
@@ -44,8 +46,23 @@ public class RhythmCtl {
         measuresPerLoop => this.measuresPerLoop;
     }
 
+    fun void checkStructure() {
+        if (spb::second * (beatsPerMeasure * measuresPerLoop * loopsPerSection *
+            numSections) == composition) {
+            <<<"Congrats, your structure is exact","">>>;
+        } else {
+            <<<"WARNING: your structure setup is not exact">>>;
+        }
+        composition / (spb::second) => float bpc;     // beats per composition
+        composition / ((spb*beatsPerMeasure)::second) => float mpc;         // measures per composition
+        composition / ((spb*beatsPerMeasure*measuresPerLoop)::second) => float lpc;         // loops per composition
+        composition / ((spb*beatsPerMeasure*measuresPerLoop*loopsPerSection)::second) => float spc;         // sections per composition
+        <<<"Total beats:", bpc, "total measures:", mpc>>>;
+        <<<"Total loops:", lpc, "total sections:", lpc>>>;
+    }
+
     fun void changeBeatAssign(int newBeatAssign) {
-        if (newBeatAssign == 4 || newBeatAssign == 8 ||
+        if (newBeatAssign == 2 || newBeatAssign == 4 || newBeatAssign == 8 ||
             newBeatAssign == 16 || newBeatAssign == 32) {
             newBeatAssign => beatAssign;
         } else {
@@ -58,7 +75,9 @@ public class RhythmCtl {
     }
 
     fun void updateRhythms(float spb) {
-        spb * (beatAssign / 4.0)::second => quarter;
+        spb * (beatAssign / 2.0)::second => half;
+        <<<beatAssign, half>>>;
+        half / 2 => quarter;
         quarter / 2 => eighth;
         eighth / 2 => sixteenth;
         sixteenth / 2 => thirtysecond;

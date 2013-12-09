@@ -4,11 +4,9 @@ public class HarmCtl {
 
     // scale mode
     static string mode[];
-    ["dorian"] @=> mode;        // Hack to workaround the Chuck bug regarding
-                                // static strings
 
-    50 => static int fundamental;
-    2 => static int globalOctave;// octave of the global fundamental
+    static int fundamental;
+    static int globalOctave;// octave of the global fundamental
     2 => int localOctave;       // octave in the concret object
     2 => int lastOctave;        // last octave used
     [50, 52, 53, 55, 57, 59, 60] @=> int scale[]; // Default: Aeolian D
@@ -21,7 +19,7 @@ public class HarmCtl {
     [0, 2, 4, 5, 7, 9, 10] @=> modesRelatio["mixolydian"];
     [0, 2, 3, 5, 7, 8, 10] @=> modesRelatio["aeolian"];
     [0, 1, 3, 5, 6, 8, 10] @=> modesRelatio["locrian"];
-    [0, 2, 3, 4, 7, 9, 11] @=> modesRelatio["ionian"];
+    [0, 2, 4, 5, 7, 9, 11] @=> modesRelatio["ionian"];
 
     ["dorian", "phrygian", "lydian", "mixolydian", "aeolian", "locrian",
     "ionian"] @=> string modeIndexes[];
@@ -124,16 +122,3 @@ public class HarmCtl {
         return (midiNote + (12 * octaveDeviation));
     }
 }
-
-HarmCtl h;
-
-h.setScale("C#4", "mixolydian");
-h.buildScale(2);
-
-for (0 => int z; z < h.scale.cap(); z++) {
-    <<<h.localOctave, h.globalOctave, h.scale[z]>>>;
-}
-
-<<<h.note("Db7"), h.lastOctave, h.localOctave, h.globalOctave>>>;
-1::second => now;
-
