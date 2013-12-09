@@ -20,9 +20,16 @@ Noise n => LPF filter => dac;
 0.004 => n.gain;
 
 me.dir() => string path;
+now => time start;
+Machine.add(path + "/drums.ck") => int drumsID;
 // Add lead pad
 Machine.add(path + "/lead.ck") => int leadID;
 rhythm.measure * 4 + rhythm.quarter=> now;
 // Add piano
 Machine.add(path + "/piano.ck") => int pianoID;
-rhythm.composition => now;
+rhythm.composition - (rhythm.measure * 4 + rhythm.half) => now;
+Machine.remove(drumsID);
+Machine.remove(leadID);
+Machine.remove(pianoID);
+rhythm.quarter => now;
+<<<(now-start) / second, "seconds">>>;

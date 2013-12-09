@@ -6,6 +6,7 @@ RhythmCtl rhythm;
 harmony.buildScale(3);
 LeadPad lp;
 lp.chuckIt(dac);
+0.5 => lp.pan.gain;
 
 while( true ) {
     for (0 => int i; i < notes.cap(); i++) {
