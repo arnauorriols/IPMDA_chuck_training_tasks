@@ -1,3 +1,7 @@
+// Assignment_7_Chuck_Rameau
+
+// Lead Pad instrument class. Play note calling playNote()
+
 public class LeadPad {
 
     // synths
@@ -18,8 +22,8 @@ public class LeadPad {
     1 / 4.0 => chor.modDepth;
 
     // Reverb
-    JCRev rev;
-    0.005 => rev.mix;
+    NRev rev;
+    0.01 => rev.mix;
 
     // Control parameters
     // center freq
@@ -47,6 +51,7 @@ public class LeadPad {
     3500.0 => float filtCut;
 
     // pre-constructor
+    // Main sound chain
     env => filter.filter => chor => rev => pan;
     s1 => env;
     s2 => env;

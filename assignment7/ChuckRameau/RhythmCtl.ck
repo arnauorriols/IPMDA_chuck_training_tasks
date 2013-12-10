@@ -1,3 +1,7 @@
+// Assignment_7_Chuck_Rameau
+
+// Rhythm control class
+
 public class RhythmCtl {
 
     // Member variables
@@ -76,7 +80,6 @@ public class RhythmCtl {
 
     fun void updateRhythms(float spb) {
         spb * (beatAssign / 2.0)::second => half;
-        <<<beatAssign, half>>>;
         half / 2 => quarter;
         quarter / 2 => eighth;
         eighth / 2 => sixteenth;

@@ -1,3 +1,5 @@
+// Assignment_7_Chuck_Rameau
+
 // Score file. Control global settings and time
 
 HarmCtl harmony;
@@ -8,6 +10,10 @@ rhythm.setMeter(4, 4);  // 4/4 meter, assign beat to quarter
 rhythm.setTempo(0.625); // beat is 0.625 seconds
 rhythm.structureCtl(30, 3, 1, 4);
 
+<<<"","">>>;
+<<<"CHUCK RAMEAU HOUSE REMIX. After J. P. Rameau (XVIIth century)", "">>>;
+<<<"-------------------------------------------------------------", "">>>;
+<<<"","">>>;
 <<<"Fundamental:", harmony.fundamental, "mode:", harmony.mode[0]>>>;
 <<<"Tempo:", rhythm.bpm, "Meter:", rhythm.beatsPerMeasure + "/" + rhythm.beatAssign>>>;
 <<<"Total duration:", rhythm.composition/second, "sections:",
@@ -29,7 +35,8 @@ rhythm.measure * 4 + rhythm.quarter=> now;
 Machine.add(path + "/piano.ck") => int pianoID;
 rhythm.composition - (rhythm.measure * 4 + rhythm.half) => now;
 Machine.remove(drumsID);
-Machine.remove(leadID);
+//Machine.remove(leadID);
 Machine.remove(pianoID);
-rhythm.quarter => now;
+rhythm.measure => now;
+Machine.remove(leadID);
 <<<(now-start) / second, "seconds">>>;

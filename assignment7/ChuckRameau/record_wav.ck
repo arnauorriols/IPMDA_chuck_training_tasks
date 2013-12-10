@@ -1,5 +1,12 @@
 // Assignment_07_Chuck_Rameau
 
+// version of initialize to record a wav
+
+dac => WvOut2 w => blackhole;
+
+"Chuck_Rameau.wav" => w.wavFilename;
+1 => w.record;
+
 me.dir() => string path;
 
 // Rhythm and Harmony control classes
@@ -15,6 +22,6 @@ Machine.add(path + "/LeadPad.ck");
 
 // Score
 Machine.add(path + "/score.ck") => int scoreID;
-
-
+32::second => now;
+0 => w.record;
 

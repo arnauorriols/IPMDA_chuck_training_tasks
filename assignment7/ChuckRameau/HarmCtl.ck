@@ -1,3 +1,7 @@
+// Assignment_7_Chuck_Rameau
+
+// Harmony control class
+
 public class HarmCtl {
 
     // VARIABLES

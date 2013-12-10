@@ -1,9 +1,12 @@
+// Assignment_7_Chuck_Rameau
+
+// Piano score part
 
 HarmCtl harmony;
 RhythmCtl rhythm;
 Rhodey piano[3];
 Delay swing => LPF filter => NRev rev => Pan2 pan => dac;
-0.08 => rev.mix;
+0.04 => rev.mix;
 2750 => filter.freq;
 1 => filter.Q;
 rhythm.thirtysecond * 0.2 => swing.delay;

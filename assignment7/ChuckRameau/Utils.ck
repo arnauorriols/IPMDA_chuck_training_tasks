@@ -1,3 +1,7 @@
+// Assignment_7_Chuck_Rameau
+
+// Self-made utilities library
+
 public class Utils {
     fun static float centsInt(float baseFreq, float cents) {
         return (baseFreq * Math.pow(2, (cents/1200.0)));

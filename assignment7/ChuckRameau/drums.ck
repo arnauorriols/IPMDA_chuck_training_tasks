@@ -1,3 +1,5 @@
+// Assignment_7_Chuck_Rameau
+
 // Drums.ck
 
 RhythmCtl rhythm;
@@ -33,7 +35,7 @@ rhythm.thirtysecond * 0.1 => kickdelay.delay;
 0.8 => snare.rate;
 2000 => snarefilt.freq;
 2 => snarefilt.Q;
-0.04 => snarerev.mix;
+0.01 => snarerev.mix;
 rhythm.thirtysecond * 0.3 => snaredelay.delay;
 
 1.2 => clap.rate;

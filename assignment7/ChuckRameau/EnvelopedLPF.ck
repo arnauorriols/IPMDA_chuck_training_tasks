@@ -1,3 +1,7 @@
+// Assignment_7_Chuck_Rameau
+
+// Enveloped Low Pass Filter
+
 public class EnvelopedLPF {
     LPF filter;
 
